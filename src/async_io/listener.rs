@@ -1,4 +1,4 @@
-use std::{net::{TcpListener, TcpStream}, os::fd::{AsFd, AsRawFd}, sync::{Arc, RwLock}};
+use std::{net::{TcpListener, TcpStream}, os::fd::AsRawFd, sync::{Arc, RwLock}};
 
 use polling::Event;
 
@@ -50,7 +50,7 @@ impl EventHandler for AsyncTcpListener {
 
     fn event(&mut self, event: Event) {
         if event.readable {
-            let (client, addr) = self.listener.accept().unwrap();
+            let (client, _) = self.listener.accept().unwrap();
             // at this point the listener state is becoming Accepting
             self.state.replace(ListenerState::Accepting(client));
             let mut reactor = self.reactor.write().unwrap();

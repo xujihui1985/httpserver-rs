@@ -1,4 +1,4 @@
-use std::{sync::{Arc, RwLock}, hash::Hash, collections::HashMap};
+use std::{sync::{Arc, RwLock}, collections::HashMap};
 
 use polling::Events;
 
@@ -43,7 +43,7 @@ impl EventLoop {
             self.handle_unregister();
 
             // wait for io
-            self.wait_for_io();
+            self.wait_for_io()?;
         }
     }
 

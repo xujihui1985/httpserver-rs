@@ -88,7 +88,7 @@ impl ClientRequest {
         self.set_state(ClientState::WaitingReadFile)
     }
 
-    fn write_response(&mut self, code: i32, body: Vec<u8>, path: String) {
+    fn write_response(&mut self, code: i32, _body: Vec<u8>, path: String) {
         if let Some(handle) = self.wait_handle.take() {
             handle.join().unwrap();
         }
@@ -132,7 +132,7 @@ impl EventHandler for ClientRequest {
         format!("ClientRequest {}", self.fd)
     }
 
-    fn event(&mut self, event: polling::Event) {
+    fn event(&mut self, _event: polling::Event) {
         match self.take_state() {
             Some(ClientState::Waiting) => {
                 self.set_state(ClientState::ReadRequest);

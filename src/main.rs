@@ -1,15 +1,9 @@
-use colored::*;
-use polling::{Event, Poller, Events};
 use router::Router;
-use std::collections::HashMap;
-use std::net::TcpListener;
-use std::os::fd::AsRawFd;
 use std::sync::{Arc, RwLock};
 
 use crate::async_io::event_loop::EventLoop;
 use crate::async_io::listener::AsyncTcpListener;
 use crate::async_io::reactor::Reactor;
-use crate::thread_pool::ThreadPool;
 
 mod nix;
 mod response;

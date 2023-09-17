@@ -5,7 +5,7 @@ use std::{
     net::TcpStream,
 };
 
-use crate::{response::Response, route_path::Node};
+use crate::route_path::Node;
 
 #[derive(Hash, PartialEq, Eq)]
 pub enum Method {
@@ -54,17 +54,4 @@ impl Router {
         }
     }
 
-    pub fn handle(&self, method: Method, resource: &str, client: TcpStream) -> std::io::Result<(i32, String)> {
-        if let Some(node) = self.routers.get(&method) {
-            if let Some(handler) = node.get(resource) {
-                return handler(client);
-            }
-        }
-        self.not_found(client)
-    }
-
-    pub fn not_found(&self, client: TcpStream) -> std::io::Result<(i32, String)> {
-        let mut res = Response::new(client);
-        Ok((404, "static/404.html".to_string()))
-    }
 }
