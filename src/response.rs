@@ -23,6 +23,13 @@ impl Response {
         }
     }
 
+    pub fn into_inner(self) -> Result<TcpStream> {
+        match self.writer.into_inner() {
+            Ok(client) => Ok(client),
+            Err(e) => Err(e.into_error()),
+        }
+    }
+
     pub fn write_status(&mut self, code: i32) -> Result<usize> {
         self.writer
             .write(format!("HTTP/1.1 {} {}\r\n", code, status(code)).as_bytes())

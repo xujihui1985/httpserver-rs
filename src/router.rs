@@ -27,14 +27,14 @@ impl Router {
         &mut self,
         method: Method,
         path: &str,
-        handler: fn(TcpStream) -> std::io::Result<()>,
+        handler: fn(TcpStream) -> std::io::Result<(i32, String)>,
     ) {
         let node = self.routers.entry(method).or_insert(Node::new("/"));
         node.insert(path, handler);
     }
 
-    pub fn route_client(&self, client: TcpStream) -> std::io::Result<()> {
-        let mut reader = BufReader::new(&client);
+    pub fn route_client(&self, client: &TcpStream) -> std::io::Result<(i32, String)> {
+        let mut reader = BufReader::new(client);
         let buf = reader.fill_buf()?;
 
         // read a single line
@@ -44,21 +44,17 @@ impl Router {
 
         // consume bytes
         reader.consume(len);
-        if len == 0 {
-            return Ok(());
-        }
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() < 2 {
-            let mut res = Response::new(client);
-            return res.sendfile(400, "static/400.html");
+            return Ok((400, "static/400.html".to_string()));
         }
         match (parts[0], parts[1]) {
-            ("GET", path) => self.handle(Method::GET, path, client),
-            _ => self.not_found(client),
+            ("GET", path) => Ok((200, "static/index.html".to_string())),
+            _ => Ok((400, "static/404.html".to_string())),
         }
     }
 
-    pub fn handle(&self, method: Method, resource: &str, client: TcpStream) -> std::io::Result<()> {
+    pub fn handle(&self, method: Method, resource: &str, client: TcpStream) -> std::io::Result<(i32, String)> {
         if let Some(node) = self.routers.get(&method) {
             if let Some(handler) = node.get(resource) {
                 return handler(client);
@@ -67,8 +63,8 @@ impl Router {
         self.not_found(client)
     }
 
-    pub fn not_found(&self, client: TcpStream) -> std::io::Result<()> {
+    pub fn not_found(&self, client: TcpStream) -> std::io::Result<(i32, String)> {
         let mut res = Response::new(client);
-        res.sendfile(404, "static/404.html")
+        Ok((404, "static/404.html".to_string()))
     }
 }

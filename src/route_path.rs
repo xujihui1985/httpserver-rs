@@ -1,6 +1,6 @@
 use std::net::TcpStream;
 
-pub type HandlerFn = fn(client: TcpStream) -> std::io::Result<()>;
+pub type HandlerFn = fn(client: TcpStream) -> std::io::Result<(i32, String)>;
 
 pub struct Node {
     pub nodes: Vec<Node>,
@@ -87,9 +87,9 @@ mod tests {
     #[test]
     fn test_insert_routers() {
         let mut root = Node::new("/");
-        root.insert("/", |_| Ok(()));
-        root.insert("/foo", |_| Ok(()));
-        root.insert("/foo/bar", |_| Ok(()));
+        root.insert("/", |_| Ok((200, "static/index.html".to_string())));
+        root.insert("/foo", |_| Ok((200, "static/index.html".to_string())));
+        root.insert("/foo/bar", |_| Ok((200, "static/index.html".to_string())));
 
         assert!(root.get("/").is_some());
         assert!(root.get("/foo").is_some());

@@ -6,7 +6,9 @@ use crate::{
 };
 
 pub fn configure(router: &mut Router) {
-    router.insert(Method::GET, "/", index);
+    router.insert(Method::GET, "/", |_| {
+        Ok((200, String::from("static/index.html")))
+    });
 }
 
 fn index(client: TcpStream) -> std::io::Result<()> {
