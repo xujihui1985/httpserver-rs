@@ -9,3 +9,7 @@ edition = "2021"
 colored = "2.0.4"
 libc = "0.2.148"
 polling = "3.0.0"
+
+[[bin]]
+name = "executor"
+path = "src/executor/main.rs"
