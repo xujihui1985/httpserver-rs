@@ -7,26 +7,15 @@ mod async_net;
 mod web;
 
 fn main() {
-    let mut execu = executor::Executor::new();
-    // execu.spawn(async {
-    //     let x = test().await;
-    //     println!("{}", x);
-    // });
-
-    execu.spawn(async {
+    executor::block_on(async {
         let listen = TcpListener::bind("127.0.0.1:8088").unwrap();
-        let mut router = Router::new();
-        routes::configure(&mut router);
-        while let Ok((client, addr)) = listen.accept().await {
+        while let Ok((client, _addr)) = listen.accept().await {
             executor::spawn(async {
+                let mut router = Router::new();
+                routes::configure(&mut router);
                 router.route_client(client).await.unwrap();
-            })
+            });
         }
-    });
-
-    execu.run();
-}
-
-async fn test() -> usize {
-    5
+    })
+    .unwrap();
 }

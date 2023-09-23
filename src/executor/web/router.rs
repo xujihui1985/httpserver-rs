@@ -44,22 +44,22 @@ impl Router {
         } else {
             match(parts[0], parts[1]) {
                 ("GET", path) => self.handle(Method::GET, path, client).await,
-                _ => self.not_found(&mut client).await,
+                _ => self.not_found(client).await,
             }
         }
     }
 
-    pub async fn handle(&mut self, method: Method, path: &str, mut client: TcpClient) -> std::io::Result<()> {
+    pub async fn handle(&mut self, method: Method, path: &str, client: TcpClient) -> std::io::Result<()> {
         let node = self.routers.get(&method);
         match node {
             Some(node) => {
                 let handler = node.get(path);
                 match handler {
                     Some(handler) => handler(client).await,
-                    None => self.not_found(&mut client).await,
+                    None => self.not_found(client).await,
                 }
             }
-            None => self.not_found(&mut client).await,
+            None => self.not_found(client).await,
         }
     }
 
@@ -69,7 +69,7 @@ impl Router {
         Ok(())
     }
 
-    pub async fn not_found(&self, client: &mut TcpClient) -> std::io::Result<()> {
+    pub async fn not_found(&self, client: TcpClient) -> std::io::Result<()> {
         let mut res = Response::new(client);
         res.send_file(400, "static/404.html").await?;
         Ok(())

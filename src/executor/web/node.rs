@@ -1,4 +1,4 @@
-use std::{net::TcpStream, pin::Pin};
+use std::{net::TcpStream, pin::Pin, sync::Arc};
 
 use crate::{async_net::client::TcpClient, async_io::task_queue::LocalBoxedFuture};
 
@@ -50,11 +50,11 @@ impl Node {
     }
 
     // get /root/bar
-    pub fn get(&self, path: &str) -> Option<HandlerFn> {
+    pub fn get(&self, path: &str) -> Option<&HandlerFn> {
         match path.split_once('/') {
             Some((root, "")) => {
                 if root == &self.key {
-                    self.handler
+                    self.handler.as_ref()
                 } else {
                     None
                 }
@@ -73,7 +73,7 @@ impl Node {
             None => {
                 let node = self.nodes.iter().find(|m| path == &m.key);
                 if let Some(node) = node {
-                    node.handler
+                    node.handler.as_ref()
                 } else {
                     None
                 }

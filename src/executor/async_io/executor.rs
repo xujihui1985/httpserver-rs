@@ -21,7 +21,7 @@ where
     F: Future<Output = ()> + 'static,
 {
     EXECUTOR.with(|current| -> std::io::Result<()> {
-        let mut execut = current.borrow();
+        let execut = current.borrow();
         execut.spawn(f);
         execut.run()
     })
@@ -32,7 +32,7 @@ where
     F: Future<Output = ()> + 'static,
 {
     EXECUTOR.with(|current| {
-        let mut execut = current.borrow();
+        let execut = current.borrow();
         execut.spawn(f);
     })
 }
@@ -59,22 +59,26 @@ impl Executor {
 
     pub fn run(&self) -> std::io::Result<()> {
         loop {
-            if let Some(task) = {
-                let mut tasks = self.tasks.borrow_mut();
-                tasks.pop()
-
-            } {
-                let waker = {
-                    let sender = self.tasks.borrow().sender();
-                    let waker_task = task.clone();
-                    waker_fn(move || {
-                        sender.send(waker_task.clone()).unwrap();
-                    })
-                };
-                let mut ctx = Context::from_waker(&waker);
-                match task.future.borrow_mut().as_mut().poll(&mut ctx) {
-                    Poll::Ready(()) => {}
-                    Poll::Pending => {}
+            loop {
+                if let Some(task) = {
+                    let mut tasks = self.tasks.borrow_mut();
+                    tasks.pop()
+                } {
+                    let waker = {
+                        let sender = self.tasks.borrow().sender();
+                        let waker_task = task.clone();
+                        waker_fn(move || {
+                            sender.send(waker_task.clone()).unwrap();
+                        })
+                    };
+                    let mut ctx = Context::from_waker(&waker);
+                    match task.future.borrow_mut().as_mut().poll(&mut ctx) {
+                        Poll::Ready(()) => {}
+                        Poll::Pending => {}
+                    }
+                }
+                if self.tasks.borrow().is_empty() {
+                    break;
                 }
             }
 
