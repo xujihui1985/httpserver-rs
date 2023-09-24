@@ -31,16 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             pool.execute(move || {
                 router.route_client(client)
             });
-            // let handle: JoinHandle<std::io::Result<()>>= std::thread::spawn(move || {
-            //     println!("tid [{:?}] client connect", std::thread::current().id());
-            //     router.route_client(client)?;
-            //     Ok(())
-            // });
-            // handlers.push(handle);
         }
     }
-    // while let Some(handle) = handlers.pop() {
-    //     handle.join().unwrap()?;
-    // }
     Ok(())
 }
